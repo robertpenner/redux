@@ -58,7 +58,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
   var currentState = preloadedState
   var currentListeners = []
   var nextListeners = currentListeners
-  var isDispatching = false
+  var isReducing = false
 
   function ensureCanMutateNextListeners() {
     if (nextListeners === currentListeners) {
@@ -72,7 +72,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
    * @returns {any} The current state tree of your application.
    */
   function getState() {
-    if (isDispatching) {
+    if (isReducing) {
       throw new Error(
         'You may not call store.getState() while the reducer is executing. ' +
         'The reducer has already received the state as an argument. ' +
@@ -111,7 +111,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       throw new Error('Expected listener to be a function.')
     }
 
-    if (isDispatching) {
+    if (isReducing) {
       throw new Error(
         'You may not call store.subscribe() while the reducer is executing. ' +
         'If you would like to be notified after the store has been updated, subscribe from a ' +
@@ -130,7 +130,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
         return
       }
 
-      if (isDispatching) {
+      if (isReducing) {
         throw new Error(
           'You may not unsubscribe from a store listener while the reducer is executing. ' +
           'See http://redux.js.org/docs/api/Store.html#subscribe for more details.'
@@ -185,15 +185,15 @@ export default function createStore(reducer, preloadedState, enhancer) {
       )
     }
 
-    if (isDispatching) {
+    if (isReducing) {
       throw new Error('Reducers may not dispatch actions.')
     }
 
     try {
-      isDispatching = true
+      isReducing = true
       currentState = currentReducer(currentState, action)
     } finally {
-      isDispatching = false
+      isReducing = false
     }
 
     var listeners = currentListeners = nextListeners
